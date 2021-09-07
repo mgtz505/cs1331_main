@@ -287,3 +287,337 @@ Why are strings immutable?
 -  Imagine if it were easy to dynamically change the contents of such values at runtime.  It could allow, for example, some untrustworthy code to cause the JVM to load unintended classes at a given time.  In the former example, such code could similarly change a valid password value to an invalid one to maliciously prevent a user from accessing parts of a program
 
 ## Lesson 5 - Input and Output
+	
+### Scanner
+- To read in terminal input, we’ll use a class in the API called Scanner. The class was introduced to the API in version 1.5 of Java. It adds an easier to use method for basic terminal input processing than what the original Java API provided.
+- The first step to using Scanner is to create an object as shown in the main method below:
+
+```
+public class FahrenheitToCelsius {
+    public static void main(String[] args) {
+        Scanner input = new Scanner(System.in); //read keyboard input
+    }
+}
+```
+- This single Scanner object will ultimately handle all of the inputs for our program, which will incrementally grow in size throughout this lesson. 
+- We're calling the object input to represent what we’re going to do with it (i.e., read input), but as you’ve learned, variable names are up to the programmer
+- A Scanner object can read data from multiple kinds of sources, and the object passed into the constructor represents a particular source 
+- With System.in as input, the constructor customizes the created object so that it can read the ordered stream of characters entered on the keyboard 
+- This stream of data is internally managed with a combination of hardware and software so that it correctly flows from a producer to a consumer 
+- The particular stream that connects computer programs to the data from the keyboard is called the standard input stream (or simply standard in) since every program is automatically assigned one as a built-in means to receiving data. 
+- You can direct other devices and sources to standard in, but that’s beyond the scope of this course.
+
+With content in the stream, we can use the Scanner object's methods to read chunks of data for processing. These chunks are formally called tokens, and there are different methods that represent the different types of tokens we can read. For example, there’s a nextInt method for reading the immediately available int value from the stream.  As shown below, that int value would be 78.
+
+To actually break a sequence of characters into tokens, the Scanner needs a representation of boundaries between tokens.  Such boundaries are defined by a particular sequence of characters called a delimiter. 
+- By default, Scanner uses whitespace characters as delimiters, but you can change that if needed.
+- Recall that whitespace includes the space, tab, and newline characters. Given the data below, the tokens are 78, long, and walks, as highlighted in orange:
+```
+78 long\nwalks\n
+```
+How these tokens are represented once they are read ultimately depends on which method you use.  The nextInt method described earlier would, for example, convert a token to an int value.
+- As you might guess, an error occurs if the next available token in a stream is not a sequence of characters that can be represented as an int.
+
+Each method for reading and returning data is prefixed with the word “next”, and there are several.  Here, we’ll focus on the ones that return tokens as numeric or String values, namely: nextInt, nextDouble, next, and nextLine. By learning these four, you will be able to immediately use several others like nextBoolean and nextFloat.
+
+The nextInt and nextDouble methods read individual tokens and return them as ints and doubles respectively. The next() method reads a token and returns it as a String value.  Finally, nextLine() also returns a String, but it keeps pulling characters from the stream until it reaches a new line character. The characters that are read before the terminating newline are stored in the String, but the newline character is pulled and discarded.  You’ll see more of this with a coding example:
+
+```
+import java.util.Scanner;
+
+public class NewDegreeConversion {
+    public static void main(String[] args){
+        Scanner input = new Scanner(System.in);
+        System.out.print("Enter a Fahrenheit value: ");
+        int fahrenheit = input.nextInt();
+        double celsius = (5.0/9) * (fahrenheit - 32);
+        System.out.println("Celsius: " + celsius);
+    }
+}
+```
+nextInt method skips any leading whitespace when scanning for tokens.  This rule, in fact, applies to all Scanner next methods except nextLine, which includes them in the returned String.
+
+#### Scanner Errors
+- When running a program that uses a scanner object, be careful not to enter in values
+that are not supported by the particular next method that you're using
+- Scanner has methods for peeking into a stream without actaully pulling tokens
+- Utilizing these methods requires conditional statements
+
+### Multiple Tokens Per Line
+The examples you’ve seen so far have expected a single token response for each prompt.  It is, however, possible for each line of user input to be broken into multiple tokens.
+
+Here’s a program that prompts the user to enter both temperature and day of the week on the same line
+```
+import java.util.Scanner;
+public class FahrenheitToCelsius {
+    public static void main(String[] args) {
+        Scanner input = new Scanner(System.in);
+        System.out.print("Enter a Fahrenheit value and the day of the week: ");
+        int fahrenheit = input.nextInt();
+        String day = input.next();
+        double celsius = (5.0/9) * (fahrenheit - 32);
+        System.out.println(day + " Fahrenheit: " + fahrenheit);
+        System.out.println(day + " Celsius: " + celsius);
+    }
+}
+```
+Output:
+```
+Enter a Fahrenheit value and the day of the week: 78 Monday
+Monday Fahrenheit: 78
+Monday Celsius: 25.555555555555557
+```
+If the program had called nextLine instead of next, the leading space and “Monday” would be stored in day. Here's that version:
+```
+import java.util.Scanner;
+public class FahrenheitToCelsius {
+    public static void main(String[] args) {
+        Scanner input = new Scanner(System.in);
+        System.out.print("Enter a Fahrenheit value and the day of the week: ");
+        int fahrenheit = input.nextInt();
+        String day = input.nextLine();
+        double celsius = (5.0/9) * (fahrenheit - 32);
+        System.out.println(day + " Fahrenheit: " + fahrenheit);
+        System.out.println(day + " Celsius: " + celsius);
+    }
+}
+```
+The last two lines of the program’s output would then be indented due to that space that is included in day as shown below:
+```
+Enter a Fahrenheit value and the day of the week: 78 Mo
+nday
+Monday Fahrenheit: 78
+Monday Celsius: 25.555555555555557
+```
+We can remove any leading spaces (and trailing spaces if any) by directly calling the String method trim on the output of nextLine with a statement like this:
+	
+```
+String day = input.nextLine().trim();
+```
+
+### More on Packages
+Classes can be grouped together based on the functions they provide.  These groups are officially called packages and each has a name.
+-  For example, System, String, and a long list of many other classes are in a package called java.lang.
+- They are all grouped together because they are considered fundamental to the language, and for that reason, you do not have to insert any special lines in your code before using them.
+- Other classes that are not in the java.lang package, however, require an import statement to help the compiler match a class’s name with its actual definition.  For example, Scanner, Timer, and Stack are all members of the java.util package and must therefore be imported. The java.util package offers several utility classes that will come in handy as you explore Java further.
+	
+Here’s the template to use for import statements:
+```
+import packageName.memberName;
+```
+So for Scanner, use:
+```
+import java.util.Scanner
+```
+The two packages “util” and “lang” branch off the same top level package of “java”. The “java” package is the most common in the Java API, so expect to frequently see it as we continue exploring more classes. Together, the package and member name (e.g., java.util.Scanner) represent what’s known as the fully-qualified name of a package member. Instead of using that name in the import statement, you could just enter an asterisk in place of the member name as shown atop here:
+```
+import java.util.*;
+public class FahrenheitToCelsius {
+    public static void main(String[] args) {
+        Scanner input = new Scanner(System.in);
+        System.out.print("Enter a Fahrenheit value: ");
+        int fahrenheit = input.nextInt();
+        System.out.println();
+        double celsius = (5.0/9) * (fahrenheit - 32);
+        System.out.println("Fahrenheit: " + fahrenheit);
+        System.out.println("Celsius: " + celsius);
+    }
+}
+```
+- The asterisk represents a wildcard, which means that all members of the java.util package are imported.  It is helpful in cases when there are several members of a package that need importing. 
+- For example, if you need Scanner, Stack, Timer, and other util package members in a program, it would be easier to just write a single wildcard-based import statement instead of multiple (for each member).
+- Be careful when using wildcards, however, since it is possible to have two different packages that share the name of a class but provide their own definitions
+- As a final note, it’s important to also mention that using the wildcard to import all members of a package versus using their fully-qualified names does not mean your programs are going to get bigger or anything of that nature.  
+- There may be some additional overhead during compile time from not being specific, but there’s none when it comes to runtime.  The same bytecode is generated either way.
+	
+### Formatting with Printf
+- To shorten the long trail of decimal values and to perform many other kinds of formatting on terminal output, there are a few options. One of these is the printf (or print formatted) method.
+- Like print and println, it’s is another printing method that you can invoke with the System class’s out object.  
+```
+System.out.printf(formatString, value(s));
+```
+Notice that the method can accept more than one parameter unlike print and println, which only take a single parameter representing the String to print.
+
+- The first parameter of printf is a format string, which is a String that represents the format of the output to print.  Use it to create the representation by combining the fixed parts of the output with special sequences called format specifiers.
+- These sequences serve as place holders for the non-fixed parts of the output and define any styling that needs to be applied before printing
+- The remaining parameters of printf represent the values that will be inserted into placeholders that are marked by the format specifiers.
+	
+To better understand, consider this println statement from FahrenheitToCelsius.java:
+```
+System.out.println(day + " Celsius: " + celsius);
+```
+The fixed part of the input to println is " Celsius: "  and the non-fixed parts are day and celsius since they are variables.  Here’s a matching printf statement:
+```
+System.out.printf("%s Celsius: %f\n", day, celsius);
+```
+Here, %s and %f are format specifiers holding the place for day and celsius, respectively. Here’s a template for constructing one:
+```
+%[flag][width][.precision]type
+```
+- It must start with a % to alert the compiler that the specifier is not part of the literal string.  If you ever want to print the actual % sign as part of the literal string in printf, you must use two % signs; i.e., “%%” 
+- The template fields in square brackets (flag, width, and precision) are optional but important as you’ll see in a bit. The type field (also called the conversion) is required however. It represents the type of data that will be inserted and possibly formatted.
+
+We can now revisit this printf statement:
+```
+System.out.printf("%s Celsius: %f\n", day, celsius);
+```
+Based on the type field, we can say that day is a String and Celsius is either a float or double. Notice the newline character at the end of the format string: "%s Celsius: %f\n". It’s there because, like the print method, printf does not automatically insert a newline after printing. If you do not wish to move the cursor to the next line after printing, simply omit the newline at the end of the format string.
+
+After the format string parameter, you must enter the actual parameters in the order that printf will use to fill the places held by the format specifiers.  So, the type order of these parameters must be compatible with the type order of the format specifiers in the format string.
+	
+We’ve only touched the tip of the iceberg when it comes to printf’s flexibility.  Let’s say there’s a really cold day with Celsius values in the negative thousands (pun intended):
+```
+Enter a Fahrenheit value: -888999000
+Enter a day of the week: Monday
+Enter your preferred Celsius label: Celsius
+Monday Fahrenheit: -888999000
+Monday Celsius    -493888351.1
+```
+Such output might be enhanced with thousands-separators as shown here:
+```
+Enter a Fahrenheit value: -888999000
+Enter a day of the week: Friday
+Enter your preferred Celsius label: Celsius
+Friday Fahrenheit: -888999000
+Friday Celsius    -493,888,351.1
+```
+For this option, all that’s needed is a comma flag in the celsius variable’s format specifier as highlighted below:
+```
+import java.util.Scanner;
+public class FahrenheitToCelsiusPrintf {
+    public static void main(String[] args) {
+        Scanner input = new Scanner(System.in);
+        System.out.print("Enter a Fahrenheit value: ");
+        int fahrenheit = input.nextInt();
+        System.out.print("Enter a day of the week: ");
+        String day = input.next();
+        System.out.print("Enter your preferred Celsius label: ");
+        String cText = input.next();
+        double celsius = (5.0/9) * (fahrenheit - 32);
+        System.out.printf("%s Fahrenheit: %d\n", day, fahrenheit);
+        System.out.printf("%s %-10s %,.1f \n", day, cText, celsius);
+    }
+}
+```
+#### String.format
+By learning printf, you’ve also learned how to use the String class’s format method.  It works just like printf except it doesn’t actually print the final formatted String on the terminal. Instead, the method returns the formatted String value, which you could then store in a variable for example.
+```
+String celsiusOutput = String.format("%s %-11s %,.1f \n", day, cText, celsius);
+```
+ Given the same inputs from that same example, celsiusOutput becomes a reference to this String:
+```
+"Friday Celsius    -493,888,351.1"
+```
+### Number Formatting
+Refer to the following:
+```
+import java.util.Scanner;
+import java.text.NumberFormat; 
+
+public class CurrencyDemo {
+    public static void main(String[] args) {
+        int items;
+        double itemCost, total;
+        Scanner input = new Scanner(System.in);
+        System.out.print("Enter the number of items: ");
+        items = input.nextInt();
+        System.out.print("Enter the cost per item: ");
+        itemCost = input.nextDouble();
+        total = items * itemCost;
+        System.out.println();
+        System.out.println("Unformatted Total: " + total);
+        NumberFormat currencyFormat = NumberFormat.getCurrencyInstance();
+        System.out.println("Formatted Total: " + currencyFormat.format(total));
+    }
+}
+```
+With some thinking, currency formatting could be done with printf, but the NumberFormat did it well with very little work.  All that was needed was to create an object and call a method.
+
+NumberFormat is also quite special with its support for internationalization.  Meaning that its objects’ behaviors can change based on the geographic location of the computer in which they are created. 
+- Running the same program with similar inputs on a computer in France could yield this\\
+```
+Enter the number of items: 3
+Enter the cost per item: 12.3456
+
+Unformatted Total: 37.0368
+Formatted Total: 37,04 €
+```
+Java allows you to manually specify a location using a class in the java.util package called Locale. There, you’ll find several constants representing different countries and regions that you can pass into the getCurrencyInstance method.  Here’s a version of the program using Locale.FRANCE:
+```
+import java.util.Scanner;
+import java.util.Locale;
+import java.text.NumberFormat;
+
+public class CurrencyDemo {
+    public static void main(String[] args) {
+        int items;
+        double itemCost, total;
+        Scanner input = new Scanner(System.in);
+        System.out.print("Enter the number of items: ");
+        items = input.nextInt();
+        System.out.print ("Enter the cost per item: ");
+        itemCost = input.nextDouble();
+        total = items * itemCost;
+        System.out.println();
+        System.out.println ("Unformatted Total: " + total);
+        NumberFormat currencyFmt = NumberFormat.getCurrencyInstance(Locale.FRANCE);
+        System.out.println ("Formatted Total: " + currencyFmt.format(total));
+    }
+}
+```
+
+### Decimal Format
+Another useful number formatting class in the java.text package is DecimalFormat.  It’s quite flexible by giving you the power to specify your own patterns or templates for how formatted numbers should look. 
+
+Here’s an example instantiation of a DecimalFormat object, and as shown, the instance can be initialized with a desired pattern:
+```
+DecimalFormat formatter = new DecimalFormat("0.0");
+```
+Patterns look like numbers in the format of a String literal, which makes sense since they describe how actual numbers should appear after formatting.
+Here’s how to interpret the above pattern or any other pattern with only zeros and a decimal point:
+- A digit 0 in some pattern’s position guarantees that there will be a digit (not necessarily 0) in that same position for any formatted result.
+- If the number being formatted has an actual digit in the same position of some 0 digit in the pattern, then that number’s digit will be shown in that position in the formatted result.
+- If the number being formatted does not have a digit in the same position of some 0 digit in a pattern, the formatted result will fill that position with an actual 0 digit.  
+- If there are more decimal places in the number being formatted than found in the pattern, the formatted result will round that number to a value with the same number of decimal places as specified in the pattern.
+
+To apply a pattern on a number to get a formatted (String) result, simply call the format method on a DecimalFormat object, with the number as input:
+```
+String formattedNum = formatter.format(.8675309);
+
+```
+Here’s a program that uses the above pattern and other zero-based ones to illustrate the above rules:
+```
+import java.text.DecimalFormat;
+
+public class DecimalFormatDemo {
+    public static void main(String[] args) {
+        DecimalFormat formatter1 = new DecimalFormat("0.0");
+        DecimalFormat formatter2 = new DecimalFormat("00.00");
+        DecimalFormat formatter3 = new DecimalFormat(".00");
+        DecimalFormat formatter4 = new DecimalFormat("0.00%");
+ 
+        System.out.println("0.0: " + formatter1.format(.8675309));
+        System.out.println("00.00: " + formatter2.format(.8675309));
+        System.out.println(".00: " + formatter3.format(.8675309));
+        System.out.println("0.00%: " + formatter4.format(.8675309));
+        System.out.println(".00: " + formatter3.format(8675309));
+    }
+}
+```
+The last two lines illustrate a couple of additional rules:
+
+- If a percent sign is found at the end of a pattern, the format method will return a percentage value that represents the input
+- The number of zeros to the left of a decimal point in a pattern do not constrain the number of digits that the format method will use from its input value.
+
+There are other pattern symbols that you can use besides 0 and %.  For example, the # (pound/hash) symbol allow you to write patterns with optional digits. Here’s an example:
+
+```
+DecimalFormat formatter = new DecimalFormat("#.00");
+String numStr = formatter.format(.8675309);
+System.out.println(numStr);
+```
+Output: 
+```
+.87
+```
+Since the format method’s input value is less than 1 and the pattern specifies the whole number digit is optional, there’s no zero to the right of the formatted result.
